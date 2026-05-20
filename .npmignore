@@ -1,0 +1,13 @@
+# pi-lean-flow state (auto-generated)
+.pi-lean-flow/
+
+# Source control
+.git/
+.gitignore
+.npmignore
+
+# Node
+node_modules/
+
+# Build output (keep if publishing compiled JS)
+# dist/

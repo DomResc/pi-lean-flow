@@ -1,0 +1,8 @@
+# pi-lean-flow state (auto-generated)
+.pi-lean-flow/
+
+# Build output
+dist/
+
+# Node
+node_modules/

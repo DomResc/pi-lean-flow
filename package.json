@@ -1,0 +1,42 @@
+{
+  "name": "pi-lean-flow",
+  "version": "0.1.0",
+  "description": "Minimal agile workflow extension for pi.dev — Brainstorm, Plan, Implement, Review.",
+  "keywords": [
+    "pi-package",
+    "pi-extension",
+    "agile",
+    "lean",
+    "workflow",
+    "bmad"
+  ],
+  "license": "MIT",
+  "author": "Domenico Rescigno",
+  "type": "module",
+  "main": "extension.ts",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*",
+    "@earendil-works/pi-tui": "*",
+    "typebox": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./extension.ts"
+    ],
+    "skills": [
+      "./skills"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/domresc/pi-lean-flow"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.1",
+    "typescript": "^6.0.3"
+  }
+}
