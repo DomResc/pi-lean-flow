@@ -75,24 +75,7 @@ export default function (pi: ExtensionAPI) {
     if (!ctx.hasUI) return;
     const state = await reloadState(ctx);
     const phase = phaseLabel(state.currentPhase);
-    ctx.ui.notify(`🧠 pi-lean-flow — ${phase}`, "info");
-    ctx.ui.setStatus("lean-flow", `🧠 pi-lean-flow: ${phase}`);
-
-    if (
-      Object.keys(state.artifacts).length === 0 &&
-      state.currentPhase === "brainstorm"
-    ) {
-      ctx.ui.setEditorText(
-        "🧠 pi-lean-flow — Ready to start!\n\n" +
-          "Available commands:\n" +
-          "  /skill:lean-brainstorm   — Start brainstorming\n" +
-          "  /skill:lean-plan         — Go to planning\n" +
-          "  /skill:lean-implement    — Start implementing\n" +
-          "  /skill:lean-review       — Start review\n" +
-          "  /lean-status             — Show current state\n" +
-          "  /lean-reset              — Reset everything",
-      );
-    }
+    ctx.ui.notify(`pi-lean-flow — ${phase}`, "info");
   });
 
   // ── before_agent_start: inject phase context ───────────────────────────────
