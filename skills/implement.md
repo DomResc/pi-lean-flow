@@ -1,5 +1,5 @@
 ---
-skill: lean-implement
+name: lean-implement
 description: >
   Execute the action plan one task at a time. The agent acts as Developer,
   writing code, creating files, and running validation. Supports step-by-step

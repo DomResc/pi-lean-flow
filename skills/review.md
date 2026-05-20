@@ -1,5 +1,5 @@
 ---
-skill: lean-review
+name: lean-review
 description: >
   Evaluate completed work against acceptance criteria and the original
   product brief. The agent acts as Reviewer/QA, producing a structured

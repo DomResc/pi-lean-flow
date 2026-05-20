@@ -1,5 +1,5 @@
 ---
-skill: lean-brainstorm
+name: lean-brainstorm
 description: >
   Clarify an idea through a guided multi-turn brainstorming session.
   The agent acts as Product Owner, asking questions about the problem,

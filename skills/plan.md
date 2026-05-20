@@ -1,5 +1,5 @@
 ---
-skill: lean-plan
+name: lean-plan
 description: >
   Translate a clarified product idea into a minimal technical action plan.
   The agent acts as Architect, decomposing the work into tasks with

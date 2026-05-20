@@ -24,7 +24,7 @@ composable with other skills, no complex sub-agents.
 pi install npm:pi-lean-flow
 
 # Or from a git repository
-pi install git:github.com/your-user/pi-lean-flow
+pi install git:github.com/domresc/pi-lean-flow
 
 # For development, from a local folder
 pi install ./pi-lean-flow
