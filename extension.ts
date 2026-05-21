@@ -161,20 +161,6 @@ export default function (pi: ExtensionAPI) {
     // of the session, not only after the first phase transition. The shared
     // helper formats it consistently (incl. task progress when present).
     updatePhaseStatus(ctx, state.currentPhase, state, { notify: false });
-
-    // Detect common state-coherence issues so the user knows the workflow
-    // isn't aligned with the data. We only warn — never auto-fix — because
-    // the user might have manual edits in flight.
-    const coherenceIssues = computeCoherenceIssues(state);
-    const phase = phaseLabel(state.currentPhase);
-    if (coherenceIssues.length > 0 && !isCoherenceAcked(state)) {
-      ctx.ui.notify(
-        `pi-lean-flow — ${phase}\n⚠️ ${coherenceIssues.join("; ")}. Run /lean-acknowledge to silence until the next phase change.`,
-        "warning",
-      );
-    } else {
-      ctx.ui.notify(`pi-lean-flow — ${phase}`, "info");
-    }
   });
 
   // ── before_agent_start: inject phase context ───────────────────────────────
