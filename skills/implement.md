@@ -4,7 +4,7 @@ description: >
   Execute the action plan one task at a time. The agent acts as Developer,
   writing code, creating files, and running validation. Supports step-by-step
   or auto-pilot mode. Run after lean-plan.
-allowed-tools: lean_get_artifact lean_run_checks lean_task_manage lean_evaluate_artifact read write edit bash grep
+allowed-tools: lean_get_artifact lean_run_checks lean_task_manage lean_evaluate_artifact read write edit bash grep find ls
 ---
 
 # Implementation — Task Execution
