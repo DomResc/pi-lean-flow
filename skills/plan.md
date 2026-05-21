@@ -60,6 +60,13 @@ Criteria: "node todo.mjs add 'test' creates a task and saves it to the JSON file
 Notes: Use process.argv for parsing. Save to tasks.json with fs.writeFileSync.
 ```
 
+If during the dialogue the user changes their mind about a task already
+created, prefer surgical edits over re-creating the whole plan:
+- `lean_task_manage` → `action: "edit"`, `taskId: N` to update description,
+  acceptance criteria, or notes in place.
+- `lean_task_manage` → `action: "remove"`, `taskId: N` to drop a single task.
+- Avoid `action: "clear"` unless the entire plan needs to be thrown out.
+
 ### 4. Action Plan Production
 Write the complete **Action Plan** in structured Markdown.
 

@@ -4,7 +4,7 @@ description: >
   Execute the action plan one task at a time. The agent acts as Developer,
   writing code, creating files, and running validation. Supports step-by-step
   or auto-pilot mode. Run after lean-plan.
-allowed-tools: lean_get_artifact lean_run_checks lean_task_manage read write edit bash grep find ls
+allowed-tools: lean_get_artifact lean_run_checks lean_task_manage lean_evaluate_artifact read write edit bash grep
 ---
 
 # 💻 Implementation — Task Execution
@@ -55,10 +55,15 @@ After each task, run automatically:
 **d) Automatic validation (V3)**
 After implementation, run:
 1. `lean_run_checks` → `checkType: "compile"` — verify the project builds
-2. `lean_run_checks` → `checkType: "lint"` — check code style
-3. `lean_run_checks` → `checkType: "test"` — do tests pass?
+2. `lean_run_checks` → `checkType: "typecheck"` — verify TypeScript types (if applicable)
+3. `lean_run_checks` → `checkType: "lint"` — check code style
+4. `lean_run_checks` → `checkType: "format"` — verify formatter (prettier/biome/dprint) compliance
+5. `lean_run_checks` → `checkType: "test"` — do tests pass?
 
-If everything passes, proceed. If something fails, fix before marking complete.
+Each check returns `status: "passed" | "failed" | "skipped"`. A `skipped`
+status means no tool is configured for that check — treat it as a soft pass
+and move on; do not retry or "fix" the absence. A `failed` status must be
+addressed before marking the task complete.
 
 **e) Mark complete**
 If everything is OK:
@@ -101,6 +106,46 @@ For known project types, use the appropriate tool:
 - **Python**: `python -m py_compile file.py`
 - **Go**: `go vet`
 - **Rust**: `cargo check`
+
+## Discovering New Tasks During Implementation
+
+It's common to find work that wasn't anticipated during planning.
+When this happens, **do not silently add scope** — communicate first.
+
+### Pattern for new tasks
+
+**a) Signal the discovery**
+> "While working on Task #2, I found that [X] is also needed to make it work.
+> This wasn't in the plan. Options:
+> 1. Add a new task and implement it now
+> 2. Add a task but defer it (implement later)
+> 3. Skip it (note the trade-off)"
+
+**b) If the user agrees to add it**
+Use `lean_task_manage` → `action: "add"` with a clear description and criteria.
+
+**c) Continue with the original task**
+Do not switch to the new task unless the user explicitly asks.
+Complete the current one first, then propose the new one.
+
+### When tasks grow too large
+
+If a task turns out to be significantly larger than estimated:
+> "Task #3 is more complex than I thought. I suggest splitting it into:
+> - Task 3a: [smaller scope]
+> - Task 3b: [remaining scope]
+> Should I split it? I can replace #3 with these two new ones."
+
+Prefer surgical edits over wipe-and-rebuild. The available actions are:
+- `lean_task_manage` → `action: "edit"`, `taskId: N`, plus any of
+  `description` / `acceptanceCriteria` / `notes` — updates a single field
+  in place. Use this for small refinements.
+- `lean_task_manage` → `action: "remove"`, `taskId: N` — drops one task
+  without touching the rest. Use this to split: `remove` the original,
+  then `add` the new sub-tasks.
+- `lean_task_manage` → `action: "clear"` — wipes ALL tasks. Use only when
+  the entire plan is being thrown out, and only after explicit user
+  confirmation.
 
 ## Communication with the User
 

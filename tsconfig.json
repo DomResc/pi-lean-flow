@@ -8,6 +8,7 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
+    "types": ["node"],
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "declaration": true,
@@ -15,6 +16,6 @@
     "rootDir": ".",
     "sourceMap": true,
   },
-  "include": ["extension.ts", "state/**/*.ts", "quality/**/*.ts"],
-  "exclude": ["dist", "node_modules", ".pi-lean-flow"],
+  "include": ["extension.ts", "state/**/*.ts", "quality/**/*.ts", "util/**/*.ts"],
+  "exclude": ["dist", "node_modules", ".pi-lean-flow", "**/*.test.ts", "vitest.config.ts"],
 }

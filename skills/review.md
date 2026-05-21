@@ -4,7 +4,7 @@ description: >
   Evaluate completed work against acceptance criteria and the original
   product brief. The agent acts as Reviewer/QA, producing a structured
   review report. Run after lean-implement to close the loop.
-allowed-tools: lean_evaluate_artifact lean_get_artifact lean_save_artifact lean_task_manage lean_set_phase read bash grep find ls lean_run_checks
+allowed-tools: lean_evaluate_artifact lean_get_artifact lean_save_artifact lean_task_manage lean_set_phase lean_run_checks read bash grep
 ---
 
 # 🔍 Review — Review Report
@@ -59,7 +59,16 @@ For each acceptance criterion, verify:
 Write the **Review Report** in structured Markdown.
 
 ### 4. Quality Gate (V3)
-For each problematic task, run `lean_run_checks` to validate.
+For each problematic task, run `lean_run_checks` to validate:
+- `checkType: "compile"` — build still works
+- `checkType: "typecheck"` — types resolve
+- `checkType: "lint"` — style policy holds
+- `checkType: "format"` — formatter compliance
+- `checkType: "test"` — tests pass
+
+A `skipped` status (no tool configured) is acceptable — it means the
+project doesn't track that dimension, not that the artifact is broken.
+
 Before closing, self-evaluate with:
 `lean_evaluate_artifact` → `artifactType: "reviewReport"`, score and rationale.
 
