@@ -68,8 +68,8 @@ const FULL_REVIEW_REPORT = `
 All tasks completed successfully.
 
 ## Task Details
-- Task 1: ✅ done
-- Task 2: ✅ done
+- Task 1: done
+- Task 2: done
 
 ## Decision
 Ship — no blockers found.
@@ -182,7 +182,11 @@ describe("evaluateQuality", () => {
 
   it("includes a confirmation message when all fields are present", () => {
     const result = evaluateQuality("clarifiedProduct", FULL_CLARIFIED_PRODUCT);
-    expect(result.suggestions.some((s) => s.includes("✓"))).toBe(true);
+    expect(
+      result.suggestions.some((s) =>
+        s.toLowerCase().includes("all required fields present"),
+      ),
+    ).toBe(true);
   });
 });
 
@@ -607,16 +611,16 @@ describe("formatQualityReport", () => {
     expect(md).toMatch(/^# Quality Report/m);
   });
 
-  it("shows ✅ when all required fields are present", () => {
+  it("reports all-present when all required fields are provided", () => {
     const report = generateQualityReport("actionPlan", FULL_ACTION_PLAN);
     const md = formatQualityReport(report);
-    expect(md).toContain("✅");
+    expect(md).toContain("Required fields: all present");
   });
 
-  it("shows ❌ when required fields are missing", () => {
+  it("reports missing-count when required fields are missing", () => {
     const report = generateQualityReport("actionPlan", "## Architecture\nsome text");
     const md = formatQualityReport(report);
-    expect(md).toContain("❌");
+    expect(md).toMatch(/Required fields: \d+ missing/);
   });
 
   it("includes the automated evaluation score", () => {

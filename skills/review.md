@@ -50,9 +50,9 @@ For each acceptance criterion, verify:
 - Enough comments/documentation?
 
 **d) Assign outcome**
-- ✅ **Satisfactory**: criterion met
-- ⚠️ **Improvable**: works but could be better (doesn't block)
-- ❌ **Deficient**: criterion not met (blocks)
+- **Satisfactory**: criterion met
+- **Improvable**: works but could be better (doesn't block)
+- **Deficient**: criterion not met (blocks)
 
 ### 3. Produce Report
 
@@ -78,11 +78,11 @@ Before closing, self-evaluate with:
 
 ### 6. Final Decision
 
-**If everything is OK (no ❌):**
-> "Review passed! ✅ The product is ready."
+**If everything is OK (no Deficient outcomes):**
+> "Review passed. The product is ready."
 > `lean_set_phase` → `phase: "done"`
 
-**If there are issues (❌ present):**
+**If there are issues (any Deficient outcomes):**
 > "There are [X] issues to fix before approving.
 > Here are the recommended steps. Back to implementation?"
 > Suggest `/skill:lean-implement` to iterate.
@@ -97,19 +97,19 @@ Before closing, self-evaluate with:
 |---|---|
 | Total tasks | X |
 | Completed tasks | X |
-| ✅ Satisfactory | X |
-| ⚠️ Improvable | X |
-| ❌ Deficient | X |
-| Outcome | ✅ Approved / ❌ Needs improvement |
+| Satisfactory | X |
+| Improvable | X |
+| Deficient | X |
+| Outcome | Approved / Needs improvement |
 
 ## Task Details
 
-### Task 1: [Name] — ✅ / ⚠️ / ❌
+### Task 1: [Name] — Satisfactory / Improvable / Deficient
 - [x] Criterion 1: verified — OK
-- [ ] Criterion 2: verified — ❌ [specific issue]
+- [ ] Criterion 2: verified — Deficient [specific issue]
   - **Suggestion**: [how to fix]
 
-### Task 2: [Name] — ✅
+### Task 2: [Name] — Satisfactory
 - [x] Criterion 1: OK
 - [x] Criterion 2: OK
 
@@ -135,21 +135,21 @@ Before closing, self-evaluate with:
 |---|---|
 | Total tasks | 3 |
 | Completed tasks | 3 |
-| ✅ Satisfactory | 2 |
-| ⚠️ Improvable | 1 |
-| ❌ Deficient | 0 |
-| Outcome | ✅ Approved |
+| Satisfactory | 2 |
+| Improvable | 1 |
+| Deficient | 0 |
+| Outcome | Approved |
 
-## Task 1: JSON Persistence — ✅
+## Task 1: JSON Persistence — Satisfactory
 - [x] Read/write JSON: OK
 - [x] Missing file error handling: OK
 
-## Task 2: CLI 'add' — ✅
+## Task 2: CLI 'add' — Satisfactory
 - [x] Argument parsing: OK
 - [x] Task persistence: OK
 - [x] Confirmation output: OK
 
-## Task 3: CLI 'list' — ⚠️
+## Task 3: CLI 'list' — Improvable
 - [x] List all tasks: OK
 - [ ] Status filter: not implemented (wasn't MVP)
   - Improvement: add `--done` / `--todo` flags

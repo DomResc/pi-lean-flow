@@ -175,7 +175,7 @@ export function evaluateQuality(
   // a healthy artifact. Otherwise listing both "missing fields" and a green
   // checkmark in the same response is confusing.
   if (checks.missingFields.length === 0 && clampedScore >= 7) {
-    suggestions.push("All required fields present. ✓");
+    suggestions.push("All required fields present.");
   }
 
   return {
@@ -765,10 +765,10 @@ export function formatQualityReport(report: QualityReport): string {
 
   // Field check
   if (report.fieldCheck.isValid) {
-    lines.push("## ✅ Required fields: all present");
+    lines.push("## Required fields: all present");
   } else {
     lines.push(
-      `## ❌ Required fields: ${report.fieldCheck.missingFields.length} missing`,
+      `## Required fields: ${report.fieldCheck.missingFields.length} missing`,
     );
     for (const f of report.fieldCheck.missingFields) {
       lines.push(`  - ${f}`);
@@ -776,7 +776,7 @@ export function formatQualityReport(report: QualityReport): string {
   }
   if (report.fieldCheck.warnings.length > 0) {
     lines.push("");
-    lines.push("### ⚠️ Warnings");
+    lines.push("### Warnings");
     for (const w of report.fieldCheck.warnings) {
       lines.push(`  - ${w}`);
     }
@@ -784,7 +784,7 @@ export function formatQualityReport(report: QualityReport): string {
 
   // Heuristic score
   lines.push("");
-  lines.push(`## 🤖 Automated evaluation: ${report.heuristicScore.score}/10`);
+  lines.push(`## Automated evaluation: ${report.heuristicScore.score}/10`);
   lines.push(report.heuristicScore.summary);
   if (report.heuristicScore.suggestions.length > 0) {
     lines.push("");
@@ -810,17 +810,15 @@ export function formatQualityReport(report: QualityReport): string {
   // External checks
   if (report.externalChecks && report.externalChecks.length > 0) {
     lines.push("");
-    lines.push("## 🔧 External checks");
+    lines.push("## External checks");
     for (const check of report.externalChecks) {
       // Prefer the tri-state `status` field; fall back to the legacy boolean
       // shape so reports built before this refactor still render correctly.
       const status: ExternalCheckStatus =
         check.status ??
         (check.skipped ? "skipped" : check.passed ? "passed" : "failed");
-      const icon =
-        status === "skipped" ? "⏭️" : status === "passed" ? "✅" : "❌";
       lines.push(
-        `${icon} ${check.checkType} — ${status} (${check.durationMs}ms)`,
+        `- ${check.checkType} — ${status} (${check.durationMs}ms)`,
       );
       if (check.errors.length > 0) {
         for (const e of check.errors) {

@@ -94,7 +94,7 @@ const PHASE_DESCRIPTIONS: Record<LeanPhase, string> = {
   plan: "Start: /skill:lean-plan",
   implement: "Start: /skill:lean-implement",
   review: "Start: /skill:lean-review",
-  done: "Done! 🎉",
+  done: "Done! ✓",
 };
 
 const ARTIFACT_LABELS: Record<LeanArtifactKey, string> = {
@@ -266,7 +266,7 @@ export default function (pi: ExtensionAPI) {
     if (state) {
       const issues = computeCoherenceIssues(state);
       if (issues.length > 0 && !isCoherenceAcked(state)) {
-        widgetText += " ⚠️";
+        widgetText += " ⚠";
       }
     }
     ctx.ui.setStatus("lean-flow", widgetText);
@@ -275,7 +275,7 @@ export default function (pi: ExtensionAPI) {
       // Earlier versions silently skipped the notification for `done`, which
       // meant the user got no acknowledgement at the end of the workflow.
       ctx.ui.notify(
-        `🎉 pi-lean-flow → ${phaseLabel(newPhase)}\nWorkflow completed. Use /lean-export to archive artifacts or /lean-reset to start over.`,
+        `✓ pi-lean-flow → ${phaseLabel(newPhase)}\nWorkflow completed. Use /lean-export to archive artifacts or /lean-reset to start over.`,
         "info",
       );
     } else {
@@ -323,7 +323,7 @@ export default function (pi: ExtensionAPI) {
       if (!params.content || params.content.trim().length === 0) {
         return {
           content: [
-            { type: "text", text: "❌ Refused to save: content is empty." },
+            { type: "text", text: "Refused to save: content is empty." },
           ],
           details: { error: "empty content", savedType: params.type },
         };
@@ -335,7 +335,7 @@ export default function (pi: ExtensionAPI) {
           content: [
             {
               type: "text",
-              text: `❌ Refused to save: artifact is ${params.content.length} chars, exceeds the ${MAX_ARTIFACT_CHARS}-char limit. Trim before saving.`,
+              text: `Refused to save: artifact is ${params.content.length} chars, exceeds the ${MAX_ARTIFACT_CHARS}-char limit. Trim before saving.`,
             },
           ],
           details: {
@@ -363,7 +363,7 @@ export default function (pi: ExtensionAPI) {
           content: [
             {
               type: "text",
-              text: `❌ Strict mode: artifact not saved. Missing fields: ${fieldCheck.missingFields.join(", ")}.`,
+              text: `Strict mode: artifact not saved. Missing fields: ${fieldCheck.missingFields.join(", ")}.`,
             },
           ],
           details: {
@@ -454,10 +454,10 @@ export default function (pi: ExtensionAPI) {
 
       let qualityMsg = "";
       if (!fieldCheck.isValid) {
-        qualityMsg = ` ⚠️ Missing fields: ${fieldCheck.missingFields.join(", ")} — phase not advanced.`;
+        qualityMsg = ` Missing fields: ${fieldCheck.missingFields.join(", ")} — phase not advanced.`;
       }
       if (fieldCheck.warnings.length > 0) {
-        qualityMsg += ` ⚠️ ${fieldCheck.warnings[0]}`;
+        qualityMsg += ` Warning: ${fieldCheck.warnings[0]}`;
       }
 
       // Always refresh the widget (the task counter may have shifted even
@@ -472,7 +472,7 @@ export default function (pi: ExtensionAPI) {
         content: [
           {
             type: "text",
-            text: `✅ ${label} saved. Auto-score: ${quality.score}/10.${qualityMsg} Now in: ${phaseLabel(state.currentPhase)}.`,
+            text: `${label} saved. Auto-score: ${quality.score}/10.${qualityMsg} Now in: ${phaseLabel(state.currentPhase)}.`,
           },
         ],
         details: {
@@ -539,7 +539,7 @@ export default function (pi: ExtensionAPI) {
           content: [
             {
               type: "text",
-              text: `⚠️ No artifact "${params.type}" found.${availableMsg}`,
+              text: `No artifact "${params.type}" found.${availableMsg}`,
             },
           ],
           details: {
@@ -557,7 +557,7 @@ export default function (pi: ExtensionAPI) {
           content: [
             {
               type: "text",
-              text: `⚠️ Artifact "${params.type}" exists but is empty (likely a hand-edit). Re-save it via lean_save_artifact.`,
+              text: `Artifact "${params.type}" exists but is empty (likely a hand-edit). Re-save it via lean_save_artifact.`,
             },
           ],
           details: {
@@ -635,7 +635,7 @@ export default function (pi: ExtensionAPI) {
           content: [
             {
               type: "text",
-              text: `ℹ️ Already in: ${phaseLabel(params.phase)}. No change.`,
+              text: `Already in: ${phaseLabel(params.phase)}. No change.`,
             },
           ],
           details: { previous, current: params.phase, noop: true },
@@ -654,14 +654,14 @@ export default function (pi: ExtensionAPI) {
       const need = requiredArtifact[params.phase];
       const warning =
         need && !state.artifacts[need]
-          ? ` ⚠️ No ${ARTIFACT_NAMES[need]} present — the agent may lack context.`
+          ? ` No ${ARTIFACT_NAMES[need]} present — the agent may lack context.`
           : "";
 
       return {
         content: [
           {
             type: "text",
-            text: `✅ Phase: ${phaseLabel(previous)} → ${phaseLabel(params.phase)}.${warning}`,
+            text: `Phase: ${phaseLabel(previous)} → ${phaseLabel(params.phase)}.${warning}`,
           },
         ],
         details: {
@@ -777,7 +777,7 @@ export default function (pi: ExtensionAPI) {
             content: [
               {
                 type: "text",
-                text: `✅ Task #${newTask.id}: ${newTask.description}`,
+                text: `Task #${newTask.id} added: ${newTask.description}`,
               },
             ],
             details: { action: "add", tasks: state.tasks, task: newTask },
@@ -857,7 +857,7 @@ export default function (pi: ExtensionAPI) {
           let allDoneMsg = "";
           if (result.transition.reason === "all-tasks-completed") {
             allDoneMsg =
-              "\n🎯 All tasks completed! Phase advanced to: Review. Use /skill:lean-review for the final review.";
+              "\nAll tasks completed! Phase advanced to: Review. Use /skill:lean-review for the final review.";
           }
           updatePhaseStatus(ctx, state.currentPhase, state, {
             notify: Boolean(result.transition.nextPhase),
@@ -866,7 +866,7 @@ export default function (pi: ExtensionAPI) {
             content: [
               {
                 type: "text",
-                text: `✅ Task #${result.task.id} ${status}: ${result.task.description}${allDoneMsg}`,
+                text: `Task #${result.task.id} ${status}: ${result.task.description}${allDoneMsg}`,
               },
             ],
             details: {
@@ -935,7 +935,7 @@ export default function (pi: ExtensionAPI) {
             content: [
               {
                 type: "text",
-                text: `✏️ Task #${result.task.id} updated: ${result.task.description}`,
+                text: `Task #${result.task.id} updated: ${result.task.description}`,
               },
             ],
             details: { action: "edit", tasks: state.tasks, task: result.task },
@@ -1013,7 +1013,7 @@ export default function (pi: ExtensionAPI) {
             content: [
               {
                 type: "text",
-                text: `🗑️ Task #${result.removed.id} removed: ${result.removed.description}`,
+                text: `Task #${result.removed.id} removed: ${result.removed.description}`,
               },
             ],
             details: {
@@ -1031,7 +1031,7 @@ export default function (pi: ExtensionAPI) {
             return n;
           });
           return {
-            content: [{ type: "text", text: `🗑️ ${count} task(s) cleared.` }],
+            content: [{ type: "text", text: `${count} task(s) cleared.` }],
             details: { action: "clear", tasks: state.tasks },
           };
         }
@@ -1083,7 +1083,7 @@ export default function (pi: ExtensionAPI) {
         );
       if (d?.action === "edit" && d.task)
         return new Text(
-          theme.fg("warning", "✏ ") +
+          theme.fg("warning", "⚠ ") +
             theme.fg("accent", `#${d.task.id}`) +
             theme.fg("dim", ` ${d.task.description}`),
           0,
@@ -1091,12 +1091,12 @@ export default function (pi: ExtensionAPI) {
         );
       if (d?.action === "remove" && d.task)
         return new Text(
-          theme.fg("warning", "🗑 ") + theme.fg("accent", `#${d.task.id}`),
+          theme.fg("warning", "⚠ ") + theme.fg("accent", `#${d.task.id}`),
           0,
           0,
         );
       if (d?.action === "clear")
-        return new Text(theme.fg("warning", "🗑 Cleared"), 0, 0);
+        return new Text(theme.fg("warning", "⚠ Cleared"), 0, 0);
       return new Text("", 0, 0);
     },
   });
@@ -1193,20 +1193,19 @@ export default function (pi: ExtensionAPI) {
 
       const artifactLabel =
         ARTIFACT_LABELS[params.artifactType] ?? params.artifactType;
-      const scoreEmoji = score >= 7 ? "✅" : score >= 4 ? "⚠️" : "❌";
       // Warn the caller when they are scoring an artifact that hasn't been
       // saved yet — the evaluation will still be recorded (the LLM might
       // legitimately be reviewing a draft), but the dashboard would
       // otherwise show a score for nothing.
       const missingWarning = artifactMissing
-        ? `\n\n⚠️ Note: no "${params.artifactType}" artifact is currently saved — this evaluation has no content to point at.`
+        ? `\n\nNote: no "${params.artifactType}" artifact is currently saved — this evaluation has no content to point at.`
         : "";
 
       return {
         content: [
           {
             type: "text",
-            text: `${scoreEmoji} ${artifactLabel} — Score: ${score}/10\n\n${rationale}${suggestions.length > 0 ? `\n\nSuggestions:\n${suggestions.map((s: string) => `  - ${s}`).join("\n")}` : ""}${missingWarning}`,
+            text: `${artifactLabel} — Score: ${score}/10\n\n${rationale}${suggestions.length > 0 ? `\n\nSuggestions:\n${suggestions.map((s: string) => `  - ${s}`).join("\n")}` : ""}${missingWarning}`,
           },
         ],
         details: {
@@ -1225,7 +1224,7 @@ export default function (pi: ExtensionAPI) {
       if (!d) return new Text("", 0, 0);
       const label = artifactLabel(d.artifactType ?? "");
       const scoreEmoji =
-        (d.score ?? 5) >= 7 ? "✅" : (d.score ?? 5) >= 4 ? "⚠️" : "❌";
+        (d.score ?? 5) >= 7 ? "✓" : (d.score ?? 5) >= 4 ? "⚠" : "✗";
       return new Text(
         theme.fg("accent", `${scoreEmoji} `) +
           theme.fg("dim", label) +
@@ -1279,15 +1278,13 @@ export default function (pi: ExtensionAPI) {
       const status =
         result.status ??
         (result.skipped ? "skipped" : result.passed ? "passed" : "failed");
-      const statusIcon =
-        status === "skipped" ? "⏭️" : status === "passed" ? "✅" : "❌";
       const statusLabel = status.toUpperCase();
       const output = result.output.slice(0, maxCheckOutputChars(ctx.cwd));
       const errors = result.errors
         .join("\n")
         .slice(0, maxCheckErrorChars(ctx.cwd));
 
-      let text = `${statusIcon} ${params.checkType}: ${statusLabel} (${result.durationMs}ms)\n`;
+      let text = `${params.checkType}: ${statusLabel} (${result.durationMs}ms)\n`;
       if (output) text += `\nOutput:\n${output}\n`;
       if (errors) text += `\nErrors:\n${errors}\n`;
 
@@ -1726,7 +1723,7 @@ export default function (pi: ExtensionAPI) {
           state.currentPhase !== expected &&
           state.currentPhase !== suggestNextPhase(expected)
         ) {
-          phaseHint = ` ⚠️ Current phase is ${phaseLabel(state.currentPhase)} but the latest imported artifact belongs to ${phaseLabel(expected)}. Use lean_set_phase to align.`;
+          phaseHint = ` ⚠ Current phase is ${phaseLabel(state.currentPhase)} but the latest imported artifact belongs to ${phaseLabel(expected)}. Use lean_set_phase to align.`;
         }
       }
 
@@ -1826,7 +1823,7 @@ export default function (pi: ExtensionAPI) {
         return;
       }
       const lines: string[] = [];
-      lines.push(`# Task #${task.id} ${task.done ? "✅" : "⏳"}`);
+      lines.push(`# Task #${task.id} — ${task.done ? "done" : "pending"}`);
       lines.push("");
       lines.push(`**Description:** ${task.description}`);
       if (task.acceptanceCriteria) {
@@ -2222,7 +2219,7 @@ export default function (pi: ExtensionAPI) {
           ? ` · skipped (missing/empty): ${result.missing.join(", ")}`
           : "";
       ctx.ui.notify(
-        `🔁 Revalidated ${result.revalidated.length} artifact(s) — ${summary}${missingNote}`,
+        `✓ Revalidated ${result.revalidated.length} artifact(s) — ${summary}${missingNote}`,
         "info",
       );
       updatePhaseStatus(ctx, state.currentPhase, state, { notify: false });
@@ -2268,12 +2265,12 @@ export default function (pi: ExtensionAPI) {
         );
         return;
       }
-      // Refresh the widget so the ⚠️ marker disappears immediately. Without
-      // this, the user would see the toast confirming the ack but the widget
-      // would still display the warning until the next phase change.
+      // Refresh the widget so the warning marker disappears immediately.
+      // Without this, the user would see the toast confirming the ack but the
+      // widget would still display the warning until the next phase change.
       updatePhaseStatus(ctx, state.currentPhase, state, { notify: false });
       ctx.ui.notify(
-        `🔕 Acknowledged ${result.issues.length} coherence warning(s) for ${phaseLabel(state.currentPhase)}.`,
+        `✓ Acknowledged ${result.issues.length} coherence warning(s) for ${phaseLabel(state.currentPhase)}.`,
         "info",
       );
     },
@@ -2330,7 +2327,7 @@ export default function (pi: ExtensionAPI) {
               : "no audit log files to remove",
           );
         }
-        ctx.ui.notify(`🧹 ${segments.join(" · ")}.`, "info");
+        ctx.ui.notify(`✓ ${segments.join(" · ")}.`, "info");
       }
     },
   });
@@ -2390,7 +2387,7 @@ export default function (pi: ExtensionAPI) {
       });
       if (!ctx.hasUI) return;
       updatePhaseStatus(ctx, state.currentPhase, state, { notify: false });
-      ctx.ui.notify(`✅ Task #${task.id}: ${task.description}`, "info");
+      ctx.ui.notify(`✓ Task #${task.id}: ${task.description}`, "info");
     },
   });
 
@@ -2452,7 +2449,7 @@ export default function (pi: ExtensionAPI) {
         notify: result.transitioned,
       });
       ctx.ui.notify(
-        `✅ Task #${result.task.id} ${result.task.done ? "completed" : "reopened"}: ${result.task.description}`,
+        `✓ Task #${result.task.id} ${result.task.done ? "completed" : "reopened"}: ${result.task.description}`,
         "info",
       );
     },
@@ -2529,7 +2526,7 @@ export default function (pi: ExtensionAPI) {
       }
       updatePhaseStatus(ctx, state.currentPhase, state, { notify: false });
       ctx.ui.notify(
-        `✏️ Task #${id} updated: ${Object.keys(updates).join(", ")}`,
+        `⚠ Task #${id} updated: ${Object.keys(updates).join(", ")}`,
         "info",
       );
     },
@@ -2585,7 +2582,7 @@ export default function (pi: ExtensionAPI) {
         notify: result.transitioned,
       });
       ctx.ui.notify(
-        `🗑️ Task #${result.removed.id} removed: ${result.removed.description}`,
+        `⚠ Task #${result.removed.id} removed: ${result.removed.description}`,
         "info",
       );
     },
@@ -2608,7 +2605,7 @@ export default function (pi: ExtensionAPI) {
         await resetState(ctx.cwd);
         if (ctx.hasUI) {
           ctx.ui.notify(
-            "🧹 Lean Flow state reset. Phase: Brainstorming.",
+            "✓ Lean Flow state reset. Phase: Brainstorming.",
             "info",
           );
         }

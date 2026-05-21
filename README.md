@@ -247,7 +247,7 @@ Optional per-project configuration:
 - `maxSuggestions` (default `20`) — cap number of suggestions kept per eval.
 - `maxHistoryRetained` (default `200`) — cap on `state.history` entries; oldest are dropped on save.
 
-> ⚠️ **Security note:** the `checks` field is executed as a shell command in the
+> **Security note:** the `checks` field is executed as a shell command in the
 > project working directory. Treat `.pi-lean-flow/config.json` as **executable
 > code** — review any change committed to your repo with the same care you'd
 > apply to a script in `package.json`.

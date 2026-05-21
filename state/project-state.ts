@@ -660,7 +660,7 @@ export function formatStatus(
   if (options.coherenceIssues && options.coherenceIssues.length > 0) {
     const acked = isCoherenceAcked(state);
     lines.push(
-      `⚠️ Coherence: ${options.coherenceIssues.length} issue(s)${acked ? " — acknowledged" : " — run /lean-acknowledge to silence"}`,
+      `⚠ Coherence: ${options.coherenceIssues.length} issue(s)${acked ? " — acknowledged" : " — run /lean-acknowledge to silence"}`,
     );
     for (const issue of options.coherenceIssues) {
       lines.push(`  • ${issue}`);
@@ -668,7 +668,7 @@ export function formatStatus(
   } else if (state.coherenceAck) {
     // Ack with no issues = stale ack. Surface it so the user knows it's
     // hanging around (it'll auto-clear on next phase change anyway).
-    lines.push("ℹ️ Coherence: all issues resolved (ack still on file)");
+    lines.push("ℹ Coherence: all issues resolved (ack still on file)");
   }
   lines.push("");
 
