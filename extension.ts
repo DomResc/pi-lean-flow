@@ -13,7 +13,14 @@
  * that instructs the LLM to use the tools registered here.
  */
 
-import { mkdir, writeFile, readdir, readFile, rename, unlink } from "node:fs/promises";
+import {
+  mkdir,
+  writeFile,
+  readdir,
+  readFile,
+  rename,
+  unlink,
+} from "node:fs/promises";
 import { existsSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -90,16 +97,10 @@ const PHASE_DESCRIPTIONS: Record<LeanPhase, string> = {
   done: "Done! 🎉",
 };
 
-const ARTIFACT_EMOJI: Record<LeanArtifactKey, string> = {
-  clarifiedProduct: "📋",
-  actionPlan: "📐",
-  reviewReport: "📊",
-};
-
 const ARTIFACT_LABELS: Record<LeanArtifactKey, string> = {
-  clarifiedProduct: `${ARTIFACT_EMOJI.clarifiedProduct} ${ARTIFACT_NAMES.clarifiedProduct}`,
-  actionPlan: `${ARTIFACT_EMOJI.actionPlan} ${ARTIFACT_NAMES.actionPlan}`,
-  reviewReport: `${ARTIFACT_EMOJI.reviewReport} ${ARTIFACT_NAMES.reviewReport}`,
+  clarifiedProduct: `${ARTIFACT_NAMES.clarifiedProduct}`,
+  actionPlan: `${ARTIFACT_NAMES.actionPlan}`,
+  reviewReport: `${ARTIFACT_NAMES.reviewReport}`,
 };
 
 function artifactLabel(key: string): string {
@@ -132,8 +133,7 @@ function computeCoherenceIssues(state: LeanState): string[] {
     issues.push("phase is Implementation but no tasks are defined");
   }
   if (
-    (state.currentPhase === "implement" ||
-      state.currentPhase === "review") &&
+    (state.currentPhase === "implement" || state.currentPhase === "review") &&
     !state.artifacts.actionPlan
   ) {
     issues.push("no Action Plan present");
@@ -272,7 +272,7 @@ export default function (pi: ExtensionAPI) {
     // user to run /lean-status. Also append a warning marker when the state
     // has unacknowledged coherence issues, so the user notices something
     // wrong without opening /lean-status.
-    let widgetText = `🧠 pi-lean-flow: ${phaseLabel(newPhase)}`;
+    let widgetText = `pi-lean-flow: ${phaseLabel(newPhase)}`;
     if (state && state.tasks.length > 0) {
       const done = state.tasks.filter((t) => t.done).length;
       widgetText += ` · ${done}/${state.tasks.length}`;
@@ -427,8 +427,7 @@ export default function (pi: ExtensionAPI) {
         // incomplete artifact still persists it (so the LLM can iterate),
         // but the workflow stays on the current phase until the missing
         // sections are filled in.
-        const advance =
-          s.currentPhase === completedPhase && fieldCheck.isValid;
+        const advance = s.currentPhase === completedPhase && fieldCheck.isValid;
 
         // Single history entry per save. The heuristic score is already in
         // s.evaluations (source: "auto") and the saved content is in
@@ -542,7 +541,8 @@ export default function (pi: ExtensionAPI) {
       );
       const trimmed = stored?.trim() ?? "";
       const available = LEAN_ARTIFACT_KEYS.filter(
-        (k) => Boolean(state.artifacts[k]) && state.artifacts[k]!.trim().length > 0,
+        (k) =>
+          Boolean(state.artifacts[k]) && state.artifacts[k]!.trim().length > 0,
       );
       if (!stored) {
         const availableMsg =
@@ -678,7 +678,11 @@ export default function (pi: ExtensionAPI) {
             text: `✅ Phase: ${phaseLabel(previous)} → ${phaseLabel(params.phase)}.${warning}`,
           },
         ],
-        details: { previous, current: params.phase, warning: warning.trim() || undefined },
+        details: {
+          previous,
+          current: params.phase,
+          warning: warning.trim() || undefined,
+        },
       };
     },
     renderResult(result, _options, theme, _context) {
@@ -812,34 +816,44 @@ export default function (pi: ExtensionAPI) {
             error?: string;
           }
 
-          const { state, result } = await withState<ToggleOutcome>(ctx.cwd, (s) => {
-            const t = s.tasks.find((x) => x.id === params.taskId);
-            if (!t) {
-              return {
-                task: null,
-                transition: { nextPhase: null, reason: null },
-                allDone: false,
-                error: "not found",
-              };
-            }
-            t.done = !t.done;
-            const transition = computePhaseAfterTaskToggle(s.currentPhase, s.tasks, t.done);
-            const allDone = s.tasks.length > 0 && s.tasks.every((x) => x.done);
-            if (transition.nextPhase) {
-              const note =
-                transition.reason === "all-tasks-completed"
-                  ? "All tasks completed — auto-transition to review"
-                  : `Task #${t.id} reopened — reverted to implement`;
-              transitionPhase(s, transition.nextPhase);
-              s.history.push({
-                phase: transition.nextPhase,
-                timestamp: Date.now(),
-                note,
-              });
-              dbg(`auto phase transition: ${transition.reason} → ${transition.nextPhase}`);
-            }
-            return { task: t, transition, allDone };
-          });
+          const { state, result } = await withState<ToggleOutcome>(
+            ctx.cwd,
+            (s) => {
+              const t = s.tasks.find((x) => x.id === params.taskId);
+              if (!t) {
+                return {
+                  task: null,
+                  transition: { nextPhase: null, reason: null },
+                  allDone: false,
+                  error: "not found",
+                };
+              }
+              t.done = !t.done;
+              const transition = computePhaseAfterTaskToggle(
+                s.currentPhase,
+                s.tasks,
+                t.done,
+              );
+              const allDone =
+                s.tasks.length > 0 && s.tasks.every((x) => x.done);
+              if (transition.nextPhase) {
+                const note =
+                  transition.reason === "all-tasks-completed"
+                    ? "All tasks completed — auto-transition to review"
+                    : `Task #${t.id} reopened — reverted to implement`;
+                transitionPhase(s, transition.nextPhase);
+                s.history.push({
+                  phase: transition.nextPhase,
+                  timestamp: Date.now(),
+                  note,
+                });
+                dbg(
+                  `auto phase transition: ${transition.reason} → ${transition.nextPhase}`,
+                );
+              }
+              return { task: t, transition, allDone };
+            },
+          );
 
           if (result.error || !result.task) {
             return {
@@ -857,7 +871,7 @@ export default function (pi: ExtensionAPI) {
           let allDoneMsg = "";
           if (result.transition.reason === "all-tasks-completed") {
             allDoneMsg =
-              "\n🎯 All tasks completed! Phase advanced to: 🔍 Review. Use /skill:lean-review for the final review.";
+              "\n🎯 All tasks completed! Phase advanced to: Review. Use /skill:lean-review for the final review.";
           }
           updatePhaseStatus(ctx, state.currentPhase, state, {
             notify: Boolean(result.transition.nextPhase),
@@ -881,7 +895,9 @@ export default function (pi: ExtensionAPI) {
         case "edit": {
           if (params.taskId === undefined) {
             return {
-              content: [{ type: "text", text: "Error: taskId required for edit." }],
+              content: [
+                { type: "text", text: "Error: taskId required for edit." },
+              ],
               details: { action: "edit", error: "taskId required" },
             };
           }
@@ -909,7 +925,8 @@ export default function (pi: ExtensionAPI) {
           }>(ctx.cwd, (s) => {
             const t = s.tasks.find((x) => x.id === params.taskId);
             if (!t) return { task: null };
-            if (params.description !== undefined) t.description = params.description;
+            if (params.description !== undefined)
+              t.description = params.description;
             if (params.acceptanceCriteria !== undefined)
               t.acceptanceCriteria = params.acceptanceCriteria;
             if (params.notes !== undefined) t.notes = params.notes;
@@ -942,7 +959,9 @@ export default function (pi: ExtensionAPI) {
         case "remove": {
           if (params.taskId === undefined) {
             return {
-              content: [{ type: "text", text: "Error: taskId required for remove." }],
+              content: [
+                { type: "text", text: "Error: taskId required for remove." },
+              ],
               details: { action: "remove", error: "taskId required" },
             };
           }
@@ -952,36 +971,42 @@ export default function (pi: ExtensionAPI) {
             transition: ReturnType<typeof computePhaseAfterTaskRemove>;
           }
 
-          const { state, result } = await withState<RemoveOutcome>(ctx.cwd, (s) => {
-            const idx = s.tasks.findIndex((x) => x.id === params.taskId);
-            if (idx === -1) {
-              return { removed: null, transition: { nextPhase: null, reason: null } };
-            }
-            const [t] = s.tasks.splice(idx, 1);
-            // Use the dedicated remove transition: removing tasks can only
-            // advance (implement → review), never revert. Previously this
-            // path borrowed computePhaseAfterTaskToggle with a synthetic
-            // `toggledTaskNowDone: true` — same outcome but unclear intent.
-            const transition = computePhaseAfterTaskRemove(
-              s.currentPhase,
-              s.tasks,
-            );
-            if (transition.nextPhase) {
-              transitionPhase(s, transition.nextPhase);
-              s.history.push({
-                phase: transition.nextPhase,
-                timestamp: Date.now(),
-                note:
-                  transition.reason === "all-tasks-completed"
-                    ? `Task #${t.id} removed — all remaining tasks done, auto-transition to review`
-                    : `Task #${t.id} removed`,
-              });
-            }
-            return {
-              removed: { id: t.id, description: t.description },
-              transition,
-            };
-          });
+          const { state, result } = await withState<RemoveOutcome>(
+            ctx.cwd,
+            (s) => {
+              const idx = s.tasks.findIndex((x) => x.id === params.taskId);
+              if (idx === -1) {
+                return {
+                  removed: null,
+                  transition: { nextPhase: null, reason: null },
+                };
+              }
+              const [t] = s.tasks.splice(idx, 1);
+              // Use the dedicated remove transition: removing tasks can only
+              // advance (implement → review), never revert. Previously this
+              // path borrowed computePhaseAfterTaskToggle with a synthetic
+              // `toggledTaskNowDone: true` — same outcome but unclear intent.
+              const transition = computePhaseAfterTaskRemove(
+                s.currentPhase,
+                s.tasks,
+              );
+              if (transition.nextPhase) {
+                transitionPhase(s, transition.nextPhase);
+                s.history.push({
+                  phase: transition.nextPhase,
+                  timestamp: Date.now(),
+                  note:
+                    transition.reason === "all-tasks-completed"
+                      ? `Task #${t.id} removed — all remaining tasks done, auto-transition to review`
+                      : `Task #${t.id} removed`,
+                });
+              }
+              return {
+                removed: { id: t.id, description: t.description },
+                transition,
+              };
+            },
+          );
 
           if (!result.removed) {
             return {
@@ -1332,9 +1357,9 @@ export default function (pi: ExtensionAPI) {
       "Defaults to the most recently saved artifact.",
     handler: async (args, ctx) => {
       const state = await loadState(ctx.cwd);
-      const artifactKeys = (Object.keys(state.artifacts) as LeanArtifactKey[]).filter(
-        (k) => Boolean(state.artifacts[k]),
-      );
+      const artifactKeys = (
+        Object.keys(state.artifacts) as LeanArtifactKey[]
+      ).filter((k) => Boolean(state.artifacts[k]));
 
       if (artifactKeys.length === 0) {
         if (ctx.hasUI)
@@ -1364,7 +1389,11 @@ export default function (pi: ExtensionAPI) {
         }
       }
 
-      if (!targetKey && state.lastSavedArtifact && state.artifacts[state.lastSavedArtifact]) {
+      if (
+        !targetKey &&
+        state.lastSavedArtifact &&
+        state.artifacts[state.lastSavedArtifact]
+      ) {
         targetKey = state.lastSavedArtifact;
       }
 
@@ -1400,9 +1429,7 @@ export default function (pi: ExtensionAPI) {
         .reverse()
         .find(
           (e) =>
-            e.artifactType === targetKey &&
-            e.source === "llm" &&
-            !e.orphan,
+            e.artifactType === targetKey && e.source === "llm" && !e.orphan,
         );
 
       const report = generateQualityReport(
@@ -1615,7 +1642,11 @@ export default function (pi: ExtensionAPI) {
       // of the imported keys, making the post-import phase hint
       // non-deterministic. Following the canonical order means the *last*
       // saved artifact is always the latest one in the workflow sequence.
-      type ImportEntry = { key: LeanArtifactKey; content: string; file: string };
+      type ImportEntry = {
+        key: LeanArtifactKey;
+        content: string;
+        file: string;
+      };
       const fileSet = new Set(files);
       const entries: ImportEntry[] = [];
       // Two distinct skip reasons — surfaced separately because they mean
@@ -1638,7 +1669,9 @@ export default function (pi: ExtensionAPI) {
         // a good state with a broken file.
         const fieldCheck = checkRequiredFields(key, content);
         if (!fieldCheck.isValid) {
-          invalidContent.push(`${f} (missing: ${fieldCheck.missingFields.join(", ")})`);
+          invalidContent.push(
+            `${f} (missing: ${fieldCheck.missingFields.join(", ")})`,
+          );
         }
         entries.push({ key, content, file: f });
       }
@@ -1703,7 +1736,10 @@ export default function (pi: ExtensionAPI) {
       let phaseHint = "";
       if (imported > 0 && state.lastSavedArtifact) {
         const expected = ARTIFACT_TO_PHASE[state.lastSavedArtifact];
-        if (state.currentPhase !== expected && state.currentPhase !== suggestNextPhase(expected)) {
+        if (
+          state.currentPhase !== expected &&
+          state.currentPhase !== suggestNextPhase(expected)
+        ) {
           phaseHint = ` ⚠️ Current phase is ${phaseLabel(state.currentPhase)} but the latest imported artifact belongs to ${phaseLabel(expected)}. Use lean_set_phase to align.`;
         }
       }
@@ -1711,14 +1747,9 @@ export default function (pi: ExtensionAPI) {
       if (ctx.hasUI) {
         // Cap the notify message. Full breakdown — including the two
         // distinct skip categories (empty vs unknown) — goes to the editor.
-        const emptyLabel =
-          empty.length > 0
-            ? ` · ${empty.length} empty`
-            : "";
+        const emptyLabel = empty.length > 0 ? ` · ${empty.length} empty` : "";
         const unknownLabel =
-          unknown.length > 0
-            ? ` · ${unknown.length} unknown`
-            : "";
+          unknown.length > 0 ? ` · ${unknown.length} unknown` : "";
         const invalidLabel =
           invalidContent.length > 0
             ? ` · ${invalidContent.length} with missing fields (see editor)`
@@ -1744,7 +1775,9 @@ export default function (pi: ExtensionAPI) {
           }
           if (empty.length > 0) {
             lines.push(`## Empty files (${empty.length})`);
-            lines.push("Files with no content — nothing was imported from them.");
+            lines.push(
+              "Files with no content — nothing was imported from them.",
+            );
             lines.push("");
             for (const f of empty) lines.push(`- ${f}`);
             lines.push("");
@@ -1766,8 +1799,7 @@ export default function (pi: ExtensionAPI) {
   // ── Command: /lean-next ────────────────────────────────────────────────────
 
   pi.registerCommand("lean-next", {
-    description:
-      "Suggest the next skill to invoke based on the current phase.",
+    description: "Suggest the next skill to invoke based on the current phase.",
     handler: async (_args, ctx) => {
       const state = await loadState(ctx.cwd);
       const phase = state.currentPhase;
@@ -1783,8 +1815,7 @@ export default function (pi: ExtensionAPI) {
   // ── Command: /lean-task ────────────────────────────────────────────────────
 
   pi.registerCommand("lean-task", {
-    description:
-      "Show full details of a single task. Usage: /lean-task <id>",
+    description: "Show full details of a single task. Usage: /lean-task <id>",
     handler: async (args, ctx) => {
       const state = await loadState(ctx.cwd);
       const idStr = args?.trim();
@@ -1846,7 +1877,7 @@ export default function (pi: ExtensionAPI) {
       "Show recent entries from .pi-lean-flow/audit.log. " +
       "Usage: /lean-audit [N] [--full] [--json] [--grep <pattern>] [--since <iso-date>] [--status passed|failed|skipped]. " +
       "N defaults to 20. --full keeps long commands. --json emits raw JSON Lines (in which case --full is implied). " +
-      "--grep accepts shell-style double or single quotes (e.g. --grep \"npm test\"). " +
+      '--grep accepts shell-style double or single quotes (e.g. --grep "npm test"). ' +
       "--since matches entries with timestamp >= the given ISO date. " +
       "--status filters by check outcome.",
     handler: async (args, ctx) => {
@@ -1981,7 +2012,7 @@ export default function (pi: ExtensionAPI) {
               const safeCmd =
                 typeof command === "string"
                   ? redactCommand(command)
-                  : command ?? "(no command)";
+                  : (command ?? "(no command)");
               const cmd =
                 !wantFull && typeof safeCmd === "string" && safeCmd.length > 60
                   ? safeCmd.slice(0, 57) + "…"
@@ -2141,7 +2172,7 @@ export default function (pi: ExtensionAPI) {
             ? ` · would skip (missing/empty): ${missing.join(", ")}`
             : "";
         ctx.ui.notify(
-          `🔍 Dry-run: would revalidate ${preview.length} artifact(s) — ${summary}${missingNote}`,
+          `Dry-run: would revalidate ${preview.length} artifact(s) — ${summary}${missingNote}`,
           "info",
         );
         return;
@@ -2172,11 +2203,7 @@ export default function (pi: ExtensionAPI) {
           // Same dedup rule as lean_save_artifact: if the last evaluation
           // for this artifact is already auto, replace it in place.
           const last = s.evaluations[s.evaluations.length - 1];
-          if (
-            last &&
-            last.source === "auto" &&
-            last.artifactType === key
-          ) {
+          if (last && last.source === "auto" && last.artifactType === key) {
             s.evaluations[s.evaluations.length - 1] = newEval;
           } else {
             s.evaluations.push(newEval);
@@ -2326,7 +2353,7 @@ export default function (pi: ExtensionAPI) {
 
   pi.registerCommand("lean-task-add", {
     description:
-      "Add a new task. Usage: /lean-task-add description=\"…\" [criteria=\"…\"] [notes=\"…\"]. " +
+      'Add a new task. Usage: /lean-task-add description="…" [criteria="…"] [notes="…"]. ' +
       "Field names are case-insensitive; surrounding double or single quotes around values are stripped.",
     handler: async (args, ctx) => {
       const joined = (args ?? "").trim();
@@ -2393,7 +2420,9 @@ export default function (pi: ExtensionAPI) {
       if (!Number.isInteger(id)) {
         if (ctx.hasUI)
           ctx.ui.notify(
-            idStr ? `Invalid task id: "${idStr}"` : "Usage: /lean-task-toggle <id>",
+            idStr
+              ? `Invalid task id: "${idStr}"`
+              : "Usage: /lean-task-toggle <id>",
             "warning",
           );
         return;
@@ -2423,7 +2452,10 @@ export default function (pi: ExtensionAPI) {
           });
           transitioned = true;
         }
-        return { task: { id: t.id, description: t.description, done: t.done }, transitioned };
+        return {
+          task: { id: t.id, description: t.description, done: t.done },
+          transitioned,
+        };
       });
       if (!ctx.hasUI) return;
       if (!result.task) {
@@ -2495,7 +2527,8 @@ export default function (pi: ExtensionAPI) {
       const { state, result } = await withState(ctx.cwd, (s) => {
         const t = s.tasks.find((x) => x.id === id);
         if (!t) return { found: false };
-        if (updates.description !== undefined) t.description = updates.description;
+        if (updates.description !== undefined)
+          t.description = updates.description;
         if (updates.acceptanceCriteria !== undefined)
           t.acceptanceCriteria = updates.acceptanceCriteria;
         if (updates.notes !== undefined) t.notes = updates.notes;
@@ -2527,7 +2560,9 @@ export default function (pi: ExtensionAPI) {
       if (!Number.isInteger(id)) {
         if (ctx.hasUI)
           ctx.ui.notify(
-            idStr ? `Invalid task id: "${idStr}"` : "Usage: /lean-task-remove <id>",
+            idStr
+              ? `Invalid task id: "${idStr}"`
+              : "Usage: /lean-task-remove <id>",
             "warning",
           );
         return;
@@ -2586,7 +2621,10 @@ export default function (pi: ExtensionAPI) {
       if (confirmed) {
         await resetState(ctx.cwd);
         if (ctx.hasUI) {
-          ctx.ui.notify("🧹 Lean Flow state reset. Phase: Brainstorming.", "info");
+          ctx.ui.notify(
+            "🧹 Lean Flow state reset. Phase: Brainstorming.",
+            "info",
+          );
         }
       }
     },

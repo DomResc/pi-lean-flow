@@ -240,15 +240,20 @@ function migrate(raw: Record<string, unknown>): Record<string, unknown> {
   while (version < STATE_VERSION) {
     const migrator = MIGRATIONS[version];
     if (!migrator) {
-      dbg(`no migrator for v${version}, stamping STATE_VERSION and bailing out`);
+      dbg(
+        `no migrator for v${version}, stamping STATE_VERSION and bailing out`,
+      );
       state = { ...state, version: STATE_VERSION };
       break;
     }
     dbg(`migrating state v${version} → v${version + 1}`);
     state = migrator(state);
-    const nextVersion = typeof state.version === "number" ? state.version : version + 1;
+    const nextVersion =
+      typeof state.version === "number" ? state.version : version + 1;
     if (nextVersion <= version) {
-      dbg(`migrator for v${version} did not bump version; forcing to v${version + 1}`);
+      dbg(
+        `migrator for v${version} did not bump version; forcing to v${version + 1}`,
+      );
       state = { ...state, version: version + 1 };
       version += 1;
     } else {
@@ -265,7 +270,9 @@ interface NodeError extends Error {
 }
 
 function isNodeError(value: unknown): value is NodeError {
-  return value instanceof Error && typeof (value as NodeError).code === "string";
+  return (
+    value instanceof Error && typeof (value as NodeError).code === "string"
+  );
 }
 
 /**
@@ -298,7 +305,9 @@ export async function loadState(cwd: string): Promise<LeanState> {
     const backup = `${file}.corrupt-${Date.now()}`;
     try {
       await rename(file, backup);
-      dbg(`state JSON corrupt (${(err as Error).message}); backed up to ${backup}`);
+      dbg(
+        `state JSON corrupt (${(err as Error).message}); backed up to ${backup}`,
+      );
     } catch (renameErr) {
       dbg(
         `state JSON corrupt and backup failed (${(renameErr as Error).message}); falling back to defaults`,
@@ -338,7 +347,8 @@ export async function loadState(cwd: string): Promise<LeanState> {
   if (
     migrated.coherenceAck &&
     typeof migrated.coherenceAck === "object" &&
-    typeof (migrated.coherenceAck as Record<string, unknown>).phase === "string" &&
+    typeof (migrated.coherenceAck as Record<string, unknown>).phase ===
+      "string" &&
     Number.isFinite(
       (migrated.coherenceAck as Record<string, unknown>).timestamp,
     )
@@ -426,7 +436,9 @@ async function doSave(cwd: string, state: LeanState): Promise<void> {
   // Cap evaluations to keep the file (and any future context injection) bounded.
   if (state.evaluations.length > MAX_EVALUATIONS_RETAINED) {
     const dropped = state.evaluations.length - MAX_EVALUATIONS_RETAINED;
-    dbg(`dropping ${dropped} oldest evaluation(s) to respect MAX_EVALUATIONS_RETAINED=${MAX_EVALUATIONS_RETAINED}`);
+    dbg(
+      `dropping ${dropped} oldest evaluation(s) to respect MAX_EVALUATIONS_RETAINED=${MAX_EVALUATIONS_RETAINED}`,
+    );
     state.evaluations = state.evaluations.slice(-MAX_EVALUATIONS_RETAINED);
   }
   // Cap history likewise. Phase progression and task toggles each push an
@@ -436,7 +448,9 @@ async function doSave(cwd: string, state: LeanState): Promise<void> {
   const historyCap = readMaxHistoryRetained(cwd);
   if (state.history.length > historyCap) {
     const dropped = state.history.length - historyCap;
-    dbg(`dropping ${dropped} oldest history entr(ies) to respect maxHistoryRetained=${historyCap}`);
+    dbg(
+      `dropping ${dropped} oldest history entr(ies) to respect maxHistoryRetained=${historyCap}`,
+    );
     state.history = state.history.slice(-historyCap);
   }
 
@@ -502,12 +516,14 @@ export async function withState<T>(
   mutator: (state: LeanState) => T | Promise<T>,
 ): Promise<{ state: LeanState; result: T }> {
   const prev = stateQueues.get(cwd) ?? Promise.resolve();
-  const next = prev.catch(() => undefined).then(async () => {
-    const state = await loadState(cwd);
-    const result = await mutator(state);
-    await saveState(cwd, state);
-    return { state, result };
-  });
+  const next = prev
+    .catch(() => undefined)
+    .then(async () => {
+      const state = await loadState(cwd);
+      const result = await mutator(state);
+      await saveState(cwd, state);
+      return { state, result };
+    });
   stateQueues.set(
     cwd,
     next.finally(() => {
@@ -622,11 +638,11 @@ export function computePhaseAfterTaskRemove(
 // ─── Display helpers ─────────────────────────────────────────────────────────
 
 const PHASE_LABELS: Record<LeanPhase, string> = {
-  brainstorm: "🧠 Brainstorming",
-  plan: "📋 Planning",
-  implement: "💻 Implementation",
-  review: "🔍 Review",
-  done: "✅ Done",
+  brainstorm: "Brainstorming",
+  plan: "Planning",
+  implement: "Implementation",
+  review: "Review",
+  done: "Done",
 };
 
 export function phaseLabel(phase: LeanPhase): string {
@@ -659,9 +675,9 @@ export function formatStatus(
   // Only count keys whose value is a non-empty string. An entry can exist with
   // an empty value (e.g. after a hand-edited state.json) — that must not show
   // up as a produced artifact.
-  const artifactKeys = (Object.keys(state.artifacts) as LeanArtifactKey[]).filter(
-    (k) => Boolean(state.artifacts[k]),
-  );
+  const artifactKeys = (
+    Object.keys(state.artifacts) as LeanArtifactKey[]
+  ).filter((k) => Boolean(state.artifacts[k]));
   if (artifactKeys.length > 0) {
     lines.push("Artifacts produced:");
     for (const key of artifactKeys) {
@@ -688,10 +704,7 @@ export function formatStatus(
     // a count of how many earlier ones were recorded. With deduplication of
     // consecutive auto-evals this is usually one auto + one llm per artifact,
     // but a long iteration session can still pile up llm self-evals.
-    const groups = new Map<
-      string,
-      { latest: LeanEvaluation; count: number }
-    >();
+    const groups = new Map<string, { latest: LeanEvaluation; count: number }>();
     for (const ev of state.evaluations) {
       const key = `${ev.artifactType}:${ev.source}`;
       const existing = groups.get(key);
@@ -742,10 +755,10 @@ export function formatStatus(
     // We don't bother with i18n; the unit suffix is enough.
     const kb = options.stateFileBytes / 1024;
     const formatted =
-      kb >= 1024
-        ? `${(kb / 1024).toFixed(2)} MB`
-        : `${kb.toFixed(2)} KB`;
-    lines.push(`Storage: state.json = ${formatted} (${options.stateFileBytes} bytes)`);
+      kb >= 1024 ? `${(kb / 1024).toFixed(2)} MB` : `${kb.toFixed(2)} KB`;
+    lines.push(
+      `Storage: state.json = ${formatted} (${options.stateFileBytes} bytes)`,
+    );
   }
 
   return lines.join("\n");

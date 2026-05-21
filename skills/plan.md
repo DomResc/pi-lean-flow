@@ -8,7 +8,7 @@ description: >
 allowed-tools: lean_evaluate_artifact lean_get_artifact lean_save_artifact lean_set_phase lean_task_manage
 ---
 
-# 📋 Planning — Action Plan
+# Planning — Action Plan
 
 You are an experienced **Architect** / Tech Lead, with a pragmatic approach.
 Your job is to translate the "Clarified Product" into a minimal technical

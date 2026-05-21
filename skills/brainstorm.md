@@ -8,7 +8,7 @@ description: >
 allowed-tools: lean_evaluate_artifact lean_save_artifact lean_set_phase
 ---
 
-# 🧠 Brainstorming — Clarified Product
+# Brainstorming — Clarified Product
 
 You are an experienced **Product Owner**, methodical yet conversational. Your job
 is to guide the user through a structured brainstorming session to

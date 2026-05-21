@@ -1,4 +1,4 @@
-# pi-lean-flow 🧠➡️💻
+# pi-lean-flow
 
 A [pi.dev](https://pi.dev) extension that implements a minimal 4-phase
 agile workflow using a single agent that switches "hats"
@@ -90,19 +90,19 @@ pi install ./pi-lean-flow
      └─────────────────────────┘
 ```
 
-### 1. 🧠 Brainstorming (`/skill:lean-brainstorm`)
+### 1. Brainstorming (`/skill:lean-brainstorm`)
 The agent becomes a **Product Owner** and guides you through a dialogue to clarify
 the idea. At the end, it produces a **Clarified Product Card**.
 
-### 2. 📋 Planning (`/skill:lean-plan`)
+### 2. Planning (`/skill:lean-plan`)
 The agent becomes an **Architect** and translates the card into an **Action Plan**
 with tasks, acceptance criteria, and technical notes.
 
-### 3. 💻 Implementation (`/skill:lean-implement`)
+### 3. Implementation (`/skill:lean-implement`)
 The agent becomes a **Developer** and implements the tasks one by one, writing
 code and validating the result.
 
-### 4. 🔍 Review (`/skill:lean-review`)
+### 4. Review (`/skill:lean-review`)
 The agent becomes a **Reviewer** and evaluates the completed work, producing
 a **Review Report** with issues and suggestions.
 

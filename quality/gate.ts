@@ -25,7 +25,7 @@ const REQUIRED_FIELDS: Record<string, string[]> = {
     "Vision",
     "Measurable Goals",
     "Key Requirements",
-    "Users",          // matches "## Users and Stakeholders"
+    "Users", // matches "## Users and Stakeholders"
     "Constraints",
     "Success Criteria",
     "Out of Scope",
@@ -78,17 +78,11 @@ export function checkRequiredFields(
     // Header form: anchored to start of line, requires a non-word character
     // (whitespace, colon, end-of-line) immediately after the field name.
     // Case-insensitive so `## VISION` and `## vision` both count.
-    const headerRegex = new RegExp(
-      `^#{1,3}\\s+${escaped}(?:[\\s:]|$)`,
-      "mi",
-    );
+    const headerRegex = new RegExp(`^#{1,3}\\s+${escaped}(?:[\\s:]|$)`, "mi");
     // Bold form: a stand-alone **Field** marker — anchored to start of line
     // (after optional whitespace) and closed by another `**` to avoid matches
     // inside running prose.
-    const boldRegex = new RegExp(
-      `^\\s*\\*\\*${escaped}\\*\\*`,
-      "mi",
-    );
+    const boldRegex = new RegExp(`^\\s*\\*\\*${escaped}\\*\\*`, "mi");
     if (headerRegex.test(content) || boldRegex.test(content)) {
       present.push(field);
     } else {
@@ -553,7 +547,11 @@ export function sanityCheckCheckCommand(command: string): string | null {
   if (/:\s*\(\s*\)\s*\{\s*:\|:\s*&\s*\}\s*;\s*:/.test(trimmed)) {
     return "command looks like a fork bomb";
   }
-  if (/(curl|wget|iwr|invoke-webrequest)[^\n]*\|\s*(sh|bash|zsh|pwsh|powershell|iex|invoke-expression)/i.test(trimmed)) {
+  if (
+    /(curl|wget|iwr|invoke-webrequest)[^\n]*\|\s*(sh|bash|zsh|pwsh|powershell|iex|invoke-expression)/i.test(
+      trimmed,
+    )
+  ) {
     return "command pipes a network fetch into a shell";
   }
   // Command substitution that wraps a network fetch. We accept legitimate
@@ -644,7 +642,9 @@ export async function runExternalCheck(
   const effectiveTimeout =
     options.timeoutMs ?? configuredTimeout ?? DEFAULT_CHECK_TIMEOUT_MS;
 
-  dbg(`running check "${checkType}" in "${cwd}" (timeout=${effectiveTimeout}ms): ${command}`);
+  dbg(
+    `running check "${checkType}" in "${cwd}" (timeout=${effectiveTimeout}ms): ${command}`,
+  );
   const start = Date.now();
   const outcome = await runShell(command, cwd, effectiveTimeout);
   const durationMs = Date.now() - start;
@@ -677,7 +677,9 @@ export async function runExternalCheck(
     if (outcome.stderr) {
       // Many tools (npm, vitest, tsc) print progress/warnings to stderr even
       // on success. Treat stderr as informational — don't flag as an error.
-      dbg(`check "${checkType}" stderr (non-fatal): ${outcome.stderr.slice(0, 200)}`);
+      dbg(
+        `check "${checkType}" stderr (non-fatal): ${outcome.stderr.slice(0, 200)}`,
+      );
     }
     dbg(`check "${checkType}" passed in ${durationMs}ms`);
     result = {
@@ -689,7 +691,9 @@ export async function runExternalCheck(
       durationMs,
     };
   } else {
-    dbg(`check "${checkType}" failed in ${durationMs}ms (exit ${outcome.exitCode})`);
+    dbg(
+      `check "${checkType}" failed in ${durationMs}ms (exit ${outcome.exitCode})`,
+    );
     result = {
       checkType,
       status: "failed",
@@ -793,9 +797,7 @@ export function formatQualityReport(report: QualityReport): string {
   // Self-evaluation (LLM)
   if (report.selfEvaluation) {
     lines.push("");
-    lines.push(
-      `## 🧠 Self-evaluation (LLM): ${report.selfEvaluation.score}/10`,
-    );
+    lines.push(`## Self-evaluation (LLM): ${report.selfEvaluation.score}/10`);
     lines.push(report.selfEvaluation.rationale);
     if (report.selfEvaluation.suggestions.length > 0) {
       lines.push("");
@@ -813,8 +815,10 @@ export function formatQualityReport(report: QualityReport): string {
       // Prefer the tri-state `status` field; fall back to the legacy boolean
       // shape so reports built before this refactor still render correctly.
       const status: ExternalCheckStatus =
-        check.status ?? (check.skipped ? "skipped" : check.passed ? "passed" : "failed");
-      const icon = status === "skipped" ? "⏭️" : status === "passed" ? "✅" : "❌";
+        check.status ??
+        (check.skipped ? "skipped" : check.passed ? "passed" : "failed");
+      const icon =
+        status === "skipped" ? "⏭️" : status === "passed" ? "✅" : "❌";
       lines.push(
         `${icon} ${check.checkType} — ${status} (${check.durationMs}ms)`,
       );
